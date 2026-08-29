@@ -1,0 +1,721 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Tarefas Excellington</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        exc: {
+                            50: '#fdf2f2',
+                            100: '#fde8e8',
+                            200: '#fbd5d5',
+                            300: '#f8b4b4',
+                            400: '#f98080',
+                            500: '#f05252',
+                            600: '#e02424',
+                            700: '#c81e1e',
+                            800: '#9b1c1c',
+                            900: '#771d1d',
+                            950: '#550c0c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full bg-exc-50 text-slate-800 flex flex-col antialiased selection:bg-exc-200 selection:text-exc-900">
+
+    <!-- Cabeçalho -->
+    <header class="bg-gradient-to-r from-exc-900 via-exc-800 to-exc-950 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-exc-700 p-2.5 rounded-xl shadow-inner border border-exc-600">
+                    <i data-lucide="shield-alert" class="w-7 h-7 text-exc-100"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight">Gerenciador de Tarefas Excellington</h1>
+                    <p class="text-xs text-exc-200 tracking-wide font-medium">Metodologia Matriz GUT (Gravidade, Urgência e Tendência)</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="app.abrirModalNovo()" class="inline-flex items-center gap-2 bg-exc-600 hover:bg-exc-500 text-white px-4 py-2.5 rounded-xl font-medium text-sm shadow-sm transition-all transform active:scale-95 cursor-pointer border border-exc-500">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    Nova Tarefa / Problema
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col gap-6">
+
+        <!-- Barra de Filtros e Resumo -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-exc-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total de Tarefas</p>
+                    <p id="stat-total" class="text-2xl font-bold text-slate-800">0</p>
+                </div>
+                <div class="p-3 bg-exc-50 text-exc-700 rounded-xl">
+                    <i data-lucide="layout-list" class="w-6 h-6"></i>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-red-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-red-600">Prioridade Crítica</p>
+                    <p id="stat-critica" class="text-2xl font-bold text-red-700">0</p>
+                </div>
+                <div class="p-3 bg-red-50 text-red-600 rounded-xl">
+                    <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-orange-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-orange-600">Prioridade Alta</p>
+                    <p id="stat-alta" class="text-2xl font-bold text-orange-700">0</p>
+                </div>
+                <div class="p-3 bg-orange-50 text-orange-600 rounded-xl">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-amber-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-amber-600">Prioridade Média</p>
+                    <p id="stat-media" class="text-2xl font-bold text-amber-700">0</p>
+                </div>
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                    <i data-lucide="clock" class="w-6 h-6"></i>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 flex items-center justify-between sm:col-span-2 lg:col-span-1">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600">Prioridade Baixa</p>
+                    <p id="stat-baixa" class="text-2xl font-bold text-emerald-700">0</p>
+                </div>
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros de Busca e Status -->
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-exc-100 flex flex-col sm:flex-row gap-4 justify-between items-center">
+            <div class="relative w-full sm:w-96">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                </span>
+                <input type="text" id="filtro-busca" oninput="app.filtrarTarefas()" placeholder="Buscar por título ou descrição..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-exc-500 focus:ring-1 focus:ring-exc-500">
+            </div>
+            <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+                <select id="filtro-prioridade" onchange="app.filtrarTarefas()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-exc-500">
+                    <option value="">Todas as Prioridades</option>
+                    <option value="critica">Crítica (100-125)</option>
+                    <option value="alta">Alta (41-99)</option>
+                    <option value="media">Média (16-40)</option>
+                    <option value="baixa">Baixa (1-15)</option>
+                </select>
+                <select id="filtro-status" onchange="app.filtrarTarefas()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-xl px-3 py-2 focus:outline-none focus:border-exc-500">
+                    <option value="">Todos os Status</option>
+                    <option value="Pendente">Pendente</option>
+                    <option value="Iniciada">Iniciada</option>
+                    <option value="Atrasada">Atrasada</option>
+                    <option value="Concluída">Concluída</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Lista de Tarefas -->
+        <div class="flex-1">
+            <div id="lista-vazia" class="hidden flex flex-col items-center justify-center py-16 px-4 bg-white rounded-2xl border border-dashed border-slate-300 text-center">
+                <div class="p-4 bg-exc-50 text-exc-600 rounded-full mb-3">
+                    <i data-lucide="clipboard-list" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-700">Nenhum problema cadastrado</h3>
+                <p class="text-sm text-slate-500 max-w-sm mt-1">Comece cadastrando um problema ou tarefa para classificar com a Matriz GUT.</p>
+                <button onclick="app.abrirModalNovo()" class="mt-4 bg-exc-600 hover:bg-exc-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition-all shadow-sm">
+                    Adicionar Primeiro Problema
+                </button>
+            </div>
+
+            <div id="grid-tarefas" class="grid grid-cols-1 gap-4">
+                <!-- Inserido via JavaScript -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal de Cadastro / Edição com Matriz GUT Interativa -->
+    <div id="modal-tarefa" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-exc-100">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="calculator" class="w-5 h-5 text-exc-400"></i>
+                    <h2 id="modal-titulo" class="text-lg font-bold">Novo Problema ou Tarefa (Matriz GUT)</h2>
+                </div>
+                <button onclick="app.fecharModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-6">
+                <!-- Informações Básicas -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Título do Problema ou Tarefa *</label>
+                        <input type="text" id="form-titulo" placeholder="Ex: Falha recorrente no servidor de banco de dados" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-exc-500 focus:ring-1 focus:ring-exc-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Descrição Detalhada</label>
+                        <textarea id="form-descricao" rows="2" placeholder="Descreva o contexto ou situação atual..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-exc-500 focus:ring-1 focus:ring-exc-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- Seção Matriz GUT Guiada -->
+                <div class="border-t border-slate-200 pt-6">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <i data-lucide="list-checks" class="w-4 h-4 text-exc-600"></i>
+                        Questionário Matriz GUT (Responda SIM ou NÃO)
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">Cada critério inicia em 1. Cada resposta "Sim" acrescenta 1 unidade ao critério (Valor máximo: 5).</p>
+
+                    <!-- Critério G: Gravidade -->
+                    <div class="bg-exc-50/50 border border-exc-100 rounded-2xl p-4 mb-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-bold text-sm text-exc-900 flex items-center gap-2">
+                                <span class="bg-exc-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">G</span>
+                                Gravidade (O impacto do problema)
+                            </span>
+                            <span class="bg-exc-200 text-exc-900 font-bold text-xs px-2.5 py-1 rounded-lg">Nota: <span id="score-g">1</span> / 5</span>
+                        </div>
+                        <div class="space-y-2.5" id="perguntas-g">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Critério U: Urgência -->
+                    <div class="bg-amber-50/50 border border-amber-100 rounded-2xl p-4 mb-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-bold text-sm text-amber-900 flex items-center gap-2">
+                                <span class="bg-amber-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">U</span>
+                                Urgência (O fator tempo)
+                            </span>
+                            <span class="bg-amber-200 text-amber-900 font-bold text-xs px-2.5 py-1 rounded-lg">Nota: <span id="score-u">1</span> / 5</span>
+                        </div>
+                        <div class="space-y-2.5" id="perguntas-u">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Critério T: Tendência -->
+                    <div class="bg-red-50/50 border border-red-100 rounded-2xl p-4 mb-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="font-bold text-sm text-red-900 flex items-center gap-2">
+                                <span class="bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">T</span>
+                                Tendência (A evolução do problema)
+                            </span>
+                            <span class="bg-red-200 text-red-900 font-bold text-xs px-2.5 py-1 rounded-lg">Nota: <span id="score-t">1</span> / 5</span>
+                        </div>
+                        <div class="space-y-2.5" id="perguntas-t">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Prévia da Pontuação -->
+                    <div class="bg-slate-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase font-semibold">Cálculo GUT (G × U × T)</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span id="preview-formula" class="text-lg font-mono font-bold text-exc-300">1 × 1 × 1 = 1</span>
+                                <span id="preview-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Baixa</span>
+                            </div>
+                        </div>
+                        <div class="text-right sm:text-left">
+                            <p class="text-xs text-slate-400 uppercase font-semibold">Classificação Atual</p>
+                            <p id="preview-classificacao" class="text-sm font-semibold text-slate-200">Rotina / Melhoria Secundária</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cronograma e Prazos -->
+                <div class="border-t border-slate-200 pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Início Programado</label>
+                        <input type="date" id="form-data-inicio" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-exc-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Término Estimado</label>
+                        <input type="date" id="form-data-termino" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-exc-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Conclusão Efetiva</label>
+                        <input type="date" id="form-data-conclusao" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-exc-500">
+                    </div>
+                </div>
+
+                <!-- Campo de Conclusão / Desfecho (Visível se preenchida conclusão ou status concluído) -->
+                <div id="container-desfecho" class="border-t border-slate-200 pt-4">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Desfecho / Status de Conclusão</label>
+                    <select id="form-desfecho" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-exc-500">
+                        <option value="Em Andamento">Em Andamento (Não concluído)</option>
+                        <option value="Resolvido">Resolvido</option>
+                        <option value="Ignorado">Ignorado</option>
+                        <option value="Transferido">Transferido</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
+                <button onclick="app.fecharModal()" class="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-sm font-medium rounded-xl transition-all">
+                    Cancelar
+                </button>
+                <button onclick="app.salvarTarefa()" class="px-5 py-2 bg-exc-600 hover:bg-exc-500 text-white text-sm font-medium rounded-xl shadow-sm transition-all">
+                    Salvar Tarefa
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Mensagens / Alertas Customizados -->
+    <div id="modal-alerta" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-xl max-w-sm w-full p-6 text-center space-y-4">
+            <div id="alerta-icone" class="w-12 h-12 bg-exc-100 text-exc-600 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="info" class="w-6 h-6"></i>
+            </div>
+            <h3 id="alerta-titulo" class="text-lg font-bold text-slate-800">Aviso</h3>
+            <p id="alerta-mensagem" class="text-sm text-slate-600">Mensagem aqui...</p>
+            <button onclick="app.fecharAlerta()" class="w-full bg-exc-600 hover:bg-exc-500 text-white text-sm font-medium py-2.5 rounded-xl transition-all">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <!-- Script Principal do Aplicativo -->
+    <script>
+        // Definição das perguntas do questionário GUT
+        const perguntasGUT = {
+            g: [
+                "Pode causar prejuízo, dano ou perda de dinheiro, clientes ou recursos valiosos?",
+                "Pode afetar pessoas, setores ou processos?",
+                "Pode colocar em risco a segurança, integridade física ou reputação?",
+                "Pode afetar a saúde mental, o bem-estar ou metas?"
+            ],
+            u: [
+                "Existe um prazo final determinado por lei, contrato ou chefia?",
+                "Outras tarefas ou pessoas estão paradas esperando a resolução?",
+                "Deixar para amanhã ou semana que vem pode trazer desvantagem ou colocar em risco a execução?",
+                "Existe pressão externa (cobrança) exigindo resposta imediata?"
+            ],
+            t: [
+                "Pode ocorrer novamente com o passar do tempo?",
+                "Pode piorar ou virar uma bola de neve?",
+                "Pode gerar outros problemas maiores?",
+                "Pode ficar mais difícil ou mais caro tratar no futuro?"
+            ]
+        };
+
+        class GerenciadorExcellington {
+            constructor() {
+                this.tarefas = [];
+                this.editandoId = null;
+                this.respostas = { g: [false, false, false, false], u: [false, false, false, false], t: [false, false, false, false] };
+                this.carregarDados();
+                this.inicializarApp();
+            }
+
+            inicializarApp() {
+                this.renderizarPerguntas();
+                this.atualizarCalculoPreview();
+                this.renderizarLista();
+                lucide.createIcons();
+            }
+
+            carregarDados() {
+                try {
+                    const dados = localStorage.getItem('exc_tarefas_gut');
+                    if (dados) {
+                        this.tarefas = JSON.parse(dados);
+                    }
+                } catch (e) {
+                    console.error("Erro ao carregar dados locais:", e);
+                    this.tarefas = [];
+                }
+            }
+
+            salvarDadosLocal() {
+                try {
+                    localStorage.setItem('exc_tarefas_gut', JSON.stringify(this.tarefas));
+                } catch (e) {
+                    console.error("Erro ao salvar dados locais:", e);
+                }
+            }
+
+            renderizarPerguntas() {
+                ['g', 'u', 't'].forEach(criterio => {
+                    const container = document.getElementById(`perguntas-${criterio}`);
+                    container.innerHTML = '';
+                    perguntasGUT[criterio].forEach((pergunta, index) => {
+                        const respondidoSim = this.respostas[criterio][index];
+                        const div = document.createElement('div');
+                        div.className = "flex items-start justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 text-xs";
+                        div.innerHTML = `
+                            <span class="text-slate-700 flex-1">${pergunta}</span>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" onclick="app.responder('${criterio}', ${index}, true)" class="px-2.5 py-1 rounded-lg font-bold text-xs transition-colors ${respondidoSim ? 'bg-exc-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">SIM</button>
+                                <button type="button" onclick="app.responder('${criterio}', ${index}, false)" class="px-2.5 py-1 rounded-lg font-bold text-xs transition-colors ${!respondidoSim ? 'bg-slate-800 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">NÃO</button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                });
+            }
+
+            responder(criterio, index, valor) {
+                this.respostas[criterio][index] = valor;
+                this.renderizarPerguntas();
+                this.atualizarCalculoPreview();
+            }
+
+            calcularPontuacaoGUT() {
+                const g = 1 + this.respostas.g.filter(Boolean).length;
+                const u = 1 + this.respostas.u.filter(Boolean).length;
+                const t = 1 + this.respostas.t.filter(Boolean).length;
+                const pontuacao = g * u * t;
+                return { g, u, t, pontuacao };
+            }
+
+            obterClassificacao(pontuacao) {
+                if (pontuacao >= 100) {
+                    return {
+                        nivel: 4,
+                        nome: "Prioridade Crítica",
+                        badgeClass: "bg-red-100 text-red-800 border-red-200",
+                        dotColor: "bg-red-600",
+                        classificacao: "Crise / Emergência Máxima",
+                        interpretacao: "O pior cenário possível. O problema destrói valor ou causa danos severos imediatamente, o prazo acabou e a situação está saindo do controle a cada minuto.",
+                        acao: "Intervenção imediata. Pare todas as outras atividades secundárias e foque os recursos disponíveis para estancar o dano."
+                    };
+                } else if (pontuacao >= 41) {
+                    return {
+                        nivel: 3,
+                        nome: "Prioridade Alta",
+                        badgeClass: "bg-orange-100 text-orange-800 border-orange-200",
+                        dotColor: "bg-orange-500",
+                        classificacao: "Urgente / Alerta",
+                        interpretacao: "Um cenário perigoso. O impacto já é significativo, o tempo está curto e a tendência é de piora rápida.",
+                        acao: "Requer atenção de curto prazo. Deve ser colocado no topo das prioridades do dia ou dos próximos dias."
+                    };
+                } else if (pontuacao >= 16) {
+                    return {
+                        nivel: 2,
+                        nome: "Prioridade Média",
+                        badgeClass: "bg-amber-100 text-amber-800 border-amber-200",
+                        dotColor: "bg-amber-500",
+                        classificacao: "Atenção / Planejamento",
+                        interpretacao: "É um problema moderado. Ele já causa algum incômodo ou tem prazo moderado para ser resolvido. Se ignorado, pode crescer.",
+                        acao: "Deve entrar no seu cronograma da semana ou do mês. Exige planejamento, mas não correria."
+                    };
+                } else {
+                    return {
+                        nivel: 1,
+                        nome: "Prioridade Baixa",
+                        badgeClass: "bg-emerald-100 text-emerald-800 border-emerald-200",
+                        dotColor: "bg-emerald-500",
+                        classificacao: "Rotina / Melhoria Secundária",
+                        interpretacao: "O impacto é quase nulo (Gravidade baixa), não há prazo correndo contra você e a situação vai continuar estável se nada for feito.",
+                        acao: "Pode ser agendado para o futuro ou resolvido quando sobrar tempo. Não deve consumir energia agora."
+                    };
+                }
+            }
+
+            atualizarCalculoPreview() {
+                const { g, u, t, pontuacao } = this.calcularPontuacaoGUT();
+                const info = this.obterClassificacao(pontuacao);
+                
+                document.getElementById('score-g').innerText = g;
+                document.getElementById('score-u').innerText = u;
+                document.getElementById('score-t').innerText = t;
+                document.getElementById('preview-formula').innerText = `${g} × ${u} × ${t} = ${pontuacao}`;
+                
+                const badge = document.getElementById('preview-badge');
+                badge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold border ${info.badgeClass}`;
+                badge.innerText = info.nome;
+
+                document.getElementById('preview-classificacao').innerText = info.classificacao;
+            }
+
+            calcularStatus(tarefa) {
+                if (tarefa.desfecho && tarefa.desfecho !== 'Em Andamento') {
+                    return 'Concluída';
+                }
+                if (tarefa.dataConclusao) {
+                    return 'Concluída';
+                }
+                
+                const hoje = new Date().toISOString().split('T')[0];
+                if (tarefa.dataTermino && tarefa.dataTermino < hoje) {
+                    return 'Atrasada';
+                }
+                if (tarefa.dataInicio && tarefa.dataInicio <= hoje) {
+                    return 'Iniciada';
+                }
+                return 'Pendente';
+            }
+
+            abrirModalNovo() {
+                this.editandoId = null;
+                document.getElementById('modal-titulo').innerText = "Novo Problema ou Tarefa (Matriz GUT)";
+                document.getElementById('form-titulo').value = '';
+                document.getElementById('form-descricao').value = '';
+                document.getElementById('form-data-inicio').value = new Date().toISOString().split('T')[0];
+                document.getElementById('form-data-termino').value = '';
+                document.getElementById('form-data-conclusao').value = '';
+                document.getElementById('form-desfecho').value = 'Em Andamento';
+                this.respostas = { g: [false, false, false, false], u: [false, false, false, false], t: [false, false, false, false] };
+                this.renderizarPerguntas();
+                this.atualizarCalculoPreview();
+                document.getElementById('modal-tarefa').classList.remove('hidden');
+                lucide.createIcons();
+            }
+
+            abrirModalEdicao(id) {
+                const tarefa = this.tarefas.find(t => t.id === id);
+                if (!tarefa) return;
+
+                this.editandoId = id;
+                document.getElementById('modal-titulo').innerText = "Editar Problema ou Tarefa";
+                document.getElementById('form-titulo').value = tarefa.titulo;
+                document.getElementById('form-descricao').value = tarefa.descricao || '';
+                document.getElementById('form-data-inicio').value = tarefa.dataInicio || '';
+                document.getElementById('form-data-termino').value = tarefa.dataTermino || '';
+                document.getElementById('form-data-conclusao').value = tarefa.dataConclusao || '';
+                document.getElementById('form-desfecho').value = tarefa.desfecho || 'Em Andamento';
+                
+                this.respostas = JSON.parse(JSON.stringify(tarefa.respostas));
+                this.renderizarPerguntas();
+                this.atualizarCalculoPreview();
+                document.getElementById('modal-tarefa').classList.remove('hidden');
+                lucide.createIcons();
+            }
+
+            fecharModal() {
+                document.getElementById('modal-tarefa').classList.add('hidden');
+            }
+
+            salvarTarefa() {
+                const titulo = document.getElementById('form-titulo').value.trim();
+                if (!titulo) {
+                    this.mostrarAlerta("Atenção", "Por favor, informe o título do problema ou tarefa.");
+                    return;
+                }
+
+                const descricao = document.getElementById('form-descricao').value.trim();
+                const dataInicio = document.getElementById('form-data-inicio').value;
+                const dataTermino = document.getElementById('form-data-termino').value;
+                const dataConclusao = document.getElementById('form-data-conclusao').value;
+                const desfecho = document.getElementById('form-desfecho').value;
+
+                const { g, u, t, pontuacao } = this.calcularPontuacaoGUT();
+                const infoGUT = this.obterClassificacao(pontuacao);
+
+                const tarefaObj = {
+                    id: this.editandoId || 'task_' + Date.now(),
+                    titulo,
+                    descricao,
+                    respostas: JSON.parse(JSON.stringify(this.respostas)),
+                    g, u, t,
+                    pontuacao,
+                    classificacaoInfo: infoGUT,
+                    dataInicio,
+                    dataTermino,
+                    dataConclusao,
+                    desfecho: dataConclusao ? (desfecho === 'Em Andamento' ? 'Resolvido' : desfecho) : desfecho,
+                    criadoEm: this.editandoId ? (this.tarefas.find(t => t.id === this.editandoId)?.criadoEm || new Date().toISOString()) : new Date().toISOString()
+                };
+
+                if (this.editandoId) {
+                    const index = this.tarefas.findIndex(t => t.id === this.editandoId);
+                    if (index !== -1) {
+                        this.tarefas[index] = tarefaObj;
+                    }
+                } else {
+                    this.tarefas.push(tarefaObj);
+                }
+
+                this.salvarDadosLocal();
+                this.fecharModal();
+                this.renderizarLista();
+            }
+
+            excluirTarefa(id) {
+                if (confirm("Tem certeza que deseja excluir este registro?")) {
+                    this.tarefas = this.tarefas.filter(t => t.id !== id);
+                    this.salvarDadosLocal();
+                    this.renderizarLista();
+                }
+            }
+
+            mostrarAlerta(titulo, mensagem) {
+                document.getElementById('alerta-titulo').innerText = titulo;
+                document.getElementById('alerta-mensagem').innerText = mensagem;
+                document.getElementById('modal-alerta').classList.remove('hidden');
+            }
+
+            fecharAlerta() {
+                document.getElementById('modal-alerta').classList.add('hidden');
+            }
+
+            atualizarEstatisticas(tarefasVisiveis) {
+                document.getElementById('stat-total').innerText = this.tarefas.length;
+                let criticas = 0, altas = 0, medias = 0, baixas = 0;
+                
+                this.tarefas.forEach(t => {
+                    if (t.pontuacao >= 100) criticas++;
+                    else if (t.pontuacao >= 41) altas++;
+                    else if (t.pontuacao >= 16) medias++;
+                    else baixas++;
+                });
+
+                document.getElementById('stat-critica').innerText = criticas;
+                document.getElementById('stat-alta').innerText = altas;
+                document.getElementById('stat-media').innerText = medias;
+                document.getElementById('stat-baixa').innerText = baixas;
+            }
+
+            filtrarTarefas() {
+                this.renderizarLista();
+            }
+
+            renderizarLista() {
+                const termoBusca = document.getElementById('filtro-busca').value.toLowerCase();
+                const filtroPrioridade = document.getElementById('filtro-prioridade').value;
+                const filtroStatus = document.getElementById('filtro-status').value;
+
+                // Ordenar por pontuação decrescente (regra da Matriz GUT)
+                const tarefasOrdenadas = [...this.tarefas].sort((a, b) => b.pontuacao - a.pontuacao);
+
+                const tarefasFiltradas = tarefasOrdenadas.filter(t => {
+                    const matchBusca = t.titulo.toLowerCase().includes(termoBusca) || (t.descricao && t.descricao.toLowerCase().includes(termoBusca));
+                    
+                    let matchPrioridade = true;
+                    if (filtroPrioridade === 'critica') matchPrioridade = t.pontuacao >= 100;
+                    if (filtroPrioridade === 'alta') matchPrioridade = t.pontuacao >= 41 && t.pontuacao <= 99;
+                    if (filtroPrioridade === 'media') matchPrioridade = t.pontuacao >= 16 && t.pontuacao <= 40;
+                    if (filtroPrioridade === 'baixa') matchPrioridade = t.pontuacao >= 1 && t.pontuacao <= 15;
+
+                    const statusAtual = this.calcularStatus(t);
+                    let matchStatus = true;
+                    if (filtroStatus) matchStatus = statusAtual === filtroStatus;
+
+                    return matchBusca && matchPrioridade && matchStatus;
+                });
+
+                this.atualizarEstatisticas();
+
+                const containerLista = document.getElementById('grid-tarefas');
+                const containerVazio = document.getElementById('lista-vazia');
+
+                if (tarefasFiltradas.length === 0) {
+                    containerLista.innerHTML = '';
+                    containerVazio.classList.remove('hidden');
+                    return;
+                }
+
+                containerVazio.classList.add('hidden');
+                containerLista.innerHTML = '';
+
+                tarefasFiltradas.forEach(t => {
+                    const status = this.calcularStatus(t);
+                    const info = t.classificacaoInfo;
+
+                    let statusBadgeClass = "bg-slate-100 text-slate-700";
+                    if (status === 'Iniciada') statusBadgeClass = "bg-blue-100 text-blue-700";
+                    if (status === 'Atrasada') statusBadgeClass = "bg-red-100 text-red-700 font-bold";
+                    if (status === 'Concluída') statusBadgeClass = "bg-emerald-100 text-emerald-700 font-medium";
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition-all flex flex-col gap-4";
+                    card.innerHTML = `
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                            <div class="flex items-center gap-3">
+                                <span class="w-3.5 h-3.5 rounded-full ${info.dotColor} shrink-0 shadow-sm"></span>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-base">${escapeHtml(t.titulo)}</h4>
+                                    <p class="text-xs text-slate-500 line-clamp-1">${escapeHtml(t.descricao || 'Sem descrição detalhada.')}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 self-end sm:self-auto">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold border ${info.badgeClass}">
+                                    ${info.nome} (${t.pontuacao} pts)
+                                </span>
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold ${statusBadgeClass}">
+                                    ${status} ${t.desfecho && t.desfecho !== 'Em Andamento' ? `(${t.desfecho})` : ''}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Detalhes GUT e Interpretação -->
+                        <div class="bg-slate-50 rounded-xl p-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                            <div>
+                                <span class="font-semibold text-slate-600 block mb-0.5">Fórmula GUT:</span>
+                                <span class="font-mono font-bold text-exc-700">G:${t.g} × U:${t.u} × T:${t.t} = ${t.pontuacao}</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold text-slate-600 block mb-0.5">Interpretação:</span>
+                                <span class="text-slate-600">${info.interpretacao}</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold text-slate-600 block mb-0.5">Ação Necessária:</span>
+                                <span class="text-slate-700 font-medium">${info.acao}</span>
+                            </div>
+                        </div>
+
+                        <!-- Datas e Ações -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-2 border-t border-slate-100 text-xs text-slate-500">
+                            <div class="flex flex-wrap gap-4">
+                                <span><strong>Início:</strong> ${t.dataInicio || 'Não definido'}</span>
+                                <span><strong>Término:</strong> ${t.dataTermino || 'Não definido'}</span>
+                                <span><strong>Conclusão:</strong> ${t.dataConclusao || 'Em aberto'}</span>
+                            </div>
+                            <div class="flex items-center gap-2 self-end sm:self-auto">
+                                <button onclick="app.abrirModalEdicao('${t.id}')" class="p-2 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors flex items-center gap-1">
+                                    <i data-lucide="edit-3" class="w-4 h-4"></i> Editar
+                                </button>
+                                <button onclick="app.excluirTarefa('${t.id}')" class="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors flex items-center gap-1">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    containerLista.appendChild(card);
+                });
+                lucide.createIcons();
+            }
+        }
+
+        function escapeHtml(string) {
+            return String(string).replace(/[&<"']/g, function(m) {
+                switch (m) {
+                    case '&': return '&amp;';
+                    case '<': return '&lt;';
+                    case '"': return '&quot;';
+                    case "'": return '&#039;';
+                    default: return m;
+                }
+            });
+        }
+
+        const app = new GerenciadorExcellington();
+    </script>
+</body>
+</html>
+```

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR" class="h-full">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,8 @@
     <title>Gerenciador de Tarefas Excellington</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- FontAwesome para ícones de suporte -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
@@ -44,36 +46,33 @@
                     <p class="text-xs text-exc-200 tracking-wide font-medium">Metodologia Matriz GUT (Gravidade, Urgência e Tendência)</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
+
+            <div class="flex items-center gap-3 flex-wrap justify-center">
+                <div class="flex items-center gap-2">
+                    <span id="user-display-tag" class="text-xs font-semibold text-indigo-300 hidden"></span>
+                    <button onclick="openUsernameModal()" class="text-[10px] text-indigo-400 hover:text-indigo-300 underline hidden" id="edit-user-btn">Editar</button>
+                </div>
+
+                <!-- Ícone Termos de Uso -->
+                <button onclick="toggleTermsModal()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-indigo-300 p-2 rounded-lg border border-slate-700 transition-all" title="Termos de Uso e Responsabilidade">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                </button>
+                
+                <!-- Ícone Ativação Pix -->
+                <button onclick="openActivationModal(false)" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-emerald-400 rounded-xl text-xs font-medium border border-slate-800 transition flex items-center gap-1.5" title="Renovação Mensal Pix">
+                    <i class="fa-solid fa-key"></i> Ativação
+                </button>
+
+                <!-- Botão Sair -->
+                <button onclick="exitApp()" class="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-semibold transition border border-rose-500/20 flex items-center gap-1.5" title="Sair do Aplicativo">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
+
                 <button onclick="app.abrirModalNovo()" class="inline-flex items-center gap-2 bg-exc-600 hover:bg-exc-500 text-white px-4 py-2.5 rounded-xl font-medium text-sm shadow-sm transition-all transform active:scale-95 cursor-pointer border border-exc-500">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
                     Nova Tarefa / Problema
                 </button>
             </div>
-                <div class="flex items-center gap-2 mt-0.5">
-                        <span id="user-display-tag" class="text-xs font-semibold text-indigo-300 hidden"></span>
-      <button onclick="openUsernameModal()" class="text-[10px] text-indigo-400 hover:text-indigo-300 underline hidden" id="edit-user-btn">Editar</button>
-     
-                </div>
-
-            <div class="flex items-center gap-2 flex-wrap justify-center">
- 
-                <!-- Ícone Termos de Uso -->
-                     <button onclick="toggleTermsModal()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-indigo-300 p-2 rounded-lg border border-slate-700 transition-all" title="Termos de Uso e Responsabilidade">
-        <i data-lucide="shield-check" class="w-4 h-4"></i>
-                     </button>
-                <!-- Ícone Ativação Pix -->
-                <button onclick="toggleActivationModal()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-emerald-400 rounded-xl text-xs font-medium border border-slate-800 transition" title="Renovação Mensal Pix">
-                    <i class="fa-solid fa-key"></i>
-                </button>
-                <!-- Botão Sair -->
-                <button onclick="exitApp()" class="px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-semibold transition border border-rose-500/20 flex items-center gap-1.5" title="Sair do Aplicativo">
-                    <i class="fa-solid fa-right-from-bracket"></i> Sair
-                </button>
-            </div>
-
-
-            
         </div>
     </header>
 
@@ -285,7 +284,7 @@
                     </div>
                 </div>
 
-                <!-- Campo de Conclusão / Desfecho (Visível se preenchida conclusão ou status concluído) -->
+                <!-- Campo de Conclusão / Desfecho -->
                 <div id="container-desfecho" class="border-t border-slate-200 pt-4">
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Desfecho / Status de Conclusão</label>
                     <select id="form-desfecho" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-exc-500">
@@ -323,7 +322,7 @@
         </div>
     </div>
 
-        <!-- MODAL: Cadastro de Usuário -->
+    <!-- MODAL: Cadastro de Usuário -->
     <div id="username-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-sm w-full flex flex-col shadow-2xl">
             <h3 class="text-lg font-bold mb-1 text-white flex items-center gap-2">
@@ -351,7 +350,7 @@
                 <h3 class="font-bold text-emerald-400 text-base flex items-center gap-2">
                     <i class="fa-solid fa-heart text-emerald-500"></i> Renovação Mensal Pix
                 </h3>
-                <button onclick="toggleActivationModal()" class="text-slate-400 hover:text-white p-1">
+                <button id="activation-close-btn" onclick="toggleActivationModal()" class="text-slate-400 hover:text-white p-1">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
@@ -381,7 +380,7 @@
             </div>
 
             <div class="space-y-2 pt-1 border-t border-slate-800">
-                <label class="block text-xs font-medium text-slate-300">Código de Ativação (10 dígitos):</label>
+                <label class="block text-xs font-medium text-slate-300">Código de Ativação (Gerado pelo Admin):</label>
                 <input type="text" id="activation-code-input" placeholder="Digite o código de liberação" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 text-white text-xs rounded-lg p-2.5 font-mono outline-none">
                 <button onclick="validateActivationCode()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2.5 rounded-lg transition-all shadow-md shadow-indigo-600/30">
                     Ativar Aplicativo
@@ -422,42 +421,60 @@
                 Entendi e Concordo
             </button>
         </div>
+    </div>
 
     <!-- Script Principal do Aplicativo -->
     <script>
-
         // --- CONSTANTES DE ARMAZENAMENTO E LICENCIAMENTO ---
         const USERNAME_KEY = 'excellington_gerenciador_username_v1';
         const EXPIRATION_KEY = 'excellington_gerenciador_expiration_v1';
         const PIX_KEY = '16250510850';
+        let isAppForcedBlocked = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             checkAppAccess();
         });
 
         // --- VALIDAÇÃO DE ACESSO E LICENÇA ---
+        function readStoredExpiration() {
+            const raw = localStorage.getItem(EXPIRATION_KEY);
+            if (raw === null || raw.trim() === '') return null;
+            const numeric = Number(raw);
+            if (Number.isFinite(numeric) && numeric > 0) {
+                return numeric < 100000000000 ? numeric * 1000 : numeric;
+            }
+            const parsed = Date.parse(raw);
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
         function checkAppAccess() {
             const username = localStorage.getItem(USERNAME_KEY);
+            const usernameModal = document.getElementById('username-modal');
+
             if (!username) {
                 document.getElementById('cancel-username-btn').classList.add('hidden');
                 document.getElementById('register-username-input').value = '';
-                document.getElementById('username-modal').classList.remove('hidden');
-                return;
+                if (usernameModal) usernameModal.classList.remove('hidden');
+                return false;
             }
 
-            // Exibir nome do usuário abaixo do subtítulo
             const userTag = document.getElementById('user-display-tag');
             const editBtn = document.getElementById('edit-user-btn');
-            userTag.textContent = `• Usuário: ${username}`;
-            userTag.classList.remove('hidden');
-            editBtn.classList.remove('hidden');
+            if (userTag) {
+                userTag.textContent = `• Usuário: ${username}`;
+                userTag.classList.remove('hidden');
+            }
+            if (editBtn) editBtn.classList.remove('hidden');
 
-            const expiration = localStorage.getItem(EXPIRATION_KEY);
+            const expiration = readStoredExpiration();
             const now = Date.now();
 
-            if (!expiration || now > parseInt(expiration)) {
-                toggleActivationModal();
+            if (!expiration || now > expiration) {
+                openActivationModal(true); // Bloqueio forçado por expiração
+                return false;
             }
+
+            return true;
         }
 
         function openUsernameModal() {
@@ -480,48 +497,83 @@
             localStorage.setItem(USERNAME_KEY, nameInput);
             closeUsernameModal();
 
-            if (isFirstTime) {
-                const initialTrial = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 dias iniciais
-                localStorage.setItem(EXPIRATION_KEY, initialTrial.toString());
+            if (isFirstTime && readStoredExpiration() === null) {
+                const initialTrial = Date.now() + (30 * 24 * 60 * 60 * 1000);
+                localStorage.setItem(EXPIRATION_KEY, String(initialTrial));
             }
 
             checkAppAccess();
         }
 
-        function toggleActivationModal() {
+        function openActivationModal(forced = false) {
+            isAppForcedBlocked = forced;
             const modal = document.getElementById('activation-modal');
-            modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                updateActivationInfo();
+            const closeBtn = document.getElementById('activation-close-btn');
+            
+            if (closeBtn) {
+                if (forced) {
+                    closeBtn.classList.add('hidden');
+                } else {
+                    closeBtn.classList.remove('hidden');
+                }
             }
+            if (modal) modal.classList.remove('hidden');
+            updateActivationInfo();
+        }
+
+        function toggleActivationModal() {
+            if (isAppForcedBlocked) return;
+            const modal = document.getElementById('activation-modal');
+            if (modal) {
+                modal.classList.toggle('hidden');
+                if (!modal.classList.contains('hidden')) {
+                    isAppForcedBlocked = false;
+                    const closeBtn = document.getElementById('activation-close-btn');
+                    if (closeBtn) closeBtn.classList.remove('hidden');
+                    updateActivationInfo();
+                }
+            }
+        }
+
+        function getRenewalTargetDate() {
+            const storedExpiration = readStoredExpiration();
+            const baseDate = (storedExpiration !== null && storedExpiration > Date.now()) 
+                ? new Date(storedExpiration) 
+                : new Date();
+
+            const targetDate = new Date(baseDate);
+            targetDate.setDate(targetDate.getDate() + 30);
+            targetDate.setHours(23, 59, 59, 999);
+            return targetDate;
         }
 
         function updateActivationInfo() {
             const username = localStorage.getItem(USERNAME_KEY) || 'Não cadastrado';
-            document.getElementById('activation-display-username').textContent = username;
+            const userEl = document.getElementById('activation-display-username');
+            if (userEl) userEl.textContent = username;
 
-            const expirationVal = localStorage.getItem(EXPIRATION_KEY);
+            const targetDate = getRenewalTargetDate();
             const expEl = document.getElementById('activation-display-expiration');
-
-            if (expirationVal) {
-                const expDate = new Date(parseInt(expirationVal));
-                expEl.textContent = expDate.toLocaleDateString('pt-BR', {
+            if (expEl) {
+                expEl.textContent = targetDate.toLocaleDateString('pt-BR', {
                     day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 });
-            } else {
-                expEl.textContent = 'Não definido';
             }
         }
 
         function copyPixKey() {
             const input = document.getElementById('pix-key-input');
             const btn = document.getElementById('copy-pix-btn');
-            input.select();
-            document.execCommand('copy');
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Chave Pix Copiada!';
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar Chave Pix';
-            }, 1500);
+            if (input) {
+                input.select();
+                document.execCommand('copy');
+            }
+            if (btn) {
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Chave Pix Copiada!';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar Chave Pix';
+                }, 1500);
+            }
         }
 
         function validateActivationCode() {
@@ -529,31 +581,41 @@
             const username = localStorage.getItem(USERNAME_KEY) || '';
             const cleanName = username.replace(/\s+/g, '');
             const charCount = cleanName.length;
+            const targetDate = getRenewalTargetDate();
 
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + 30);
             const day = targetDate.getDate();
             const month = targetDate.getMonth() + 1;
             const year = targetDate.getFullYear();
 
-            const sum = charCount + day + month + year;
-            const expectedCode = Math.pow(sum, 3).toString().padStart(10, '0');
+            const baseSum = charCount + day + month + year;
+            const expectedCode = String(Math.pow(baseSum, 3));
 
             if (codeInput === expectedCode || codeInput === "1234567890") {
                 localStorage.setItem(EXPIRATION_KEY, targetDate.getTime().toString());
+                isAppForcedBlocked = false;
                 document.getElementById('activation-modal').classList.add('hidden');
                 alert("Aplicativo ativado com sucesso por mais 30 dias!");
                 checkAppAccess();
             } else {
-                alert("Código de ativação inválido. Verifique o comprovante enviado para excellington@gmail.com.");
+                alert("Código de ativação inválido. Verifique os dados informados.");
             }
         }
 
-        function toggleTermsModal() {
-            document.getElementById('terms-modal').classList.toggle('hidden');
+        function checkAccessBeforeAction() {
+            const expiration = readStoredExpiration();
+            const now = Date.now();
+            if (!expiration || now > expiration) {
+                openActivationModal(true);
+                return false;
+            }
+            return true;
         }
 
-        // --- FUNÇÃO BOTÃO SAIR ---
+        function toggleTermsModal() {
+            const modal = document.getElementById('terms-modal');
+            if (modal) modal.classList.toggle('hidden');
+        }
+
         function exitApp() {
             if (confirm("Deseja realmente sair e fechar o aplicativo?")) {
                 window.close();
@@ -562,11 +624,12 @@
                 }, 300);
             }
         }
-    
 
+        setInterval(() => checkAccessBeforeAction(), 60 * 1000);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkAccessBeforeAction();
+        });
 
-
-        
         // Definição das perguntas do questionário GUT
         const perguntasGUT = {
             g: [
@@ -646,6 +709,7 @@
             }
 
             responder(criterio, index, valor) {
+                if (!checkAccessBeforeAction()) return;
                 this.respostas[criterio][index] = valor;
                 this.renderizarPerguntas();
                 this.atualizarCalculoPreview();
@@ -738,6 +802,7 @@
             }
 
             abrirModalNovo() {
+                if (!checkAccessBeforeAction()) return;
                 this.editandoId = null;
                 document.getElementById('modal-titulo').innerText = "Novo Problema ou Tarefa (Matriz GUT)";
                 document.getElementById('form-titulo').value = '';
@@ -754,6 +819,7 @@
             }
 
             abrirModalEdicao(id) {
+                if (!checkAccessBeforeAction()) return;
                 const tarefa = this.tarefas.find(t => t.id === id);
                 if (!tarefa) return;
 
@@ -778,6 +844,7 @@
             }
 
             salvarTarefa() {
+                if (!checkAccessBeforeAction()) return;
                 const titulo = document.getElementById('form-titulo').value.trim();
                 if (!titulo) {
                     this.mostrarAlerta("Atenção", "Por favor, informe o título do problema ou tarefa.");
@@ -823,6 +890,7 @@
             }
 
             excluirTarefa(id) {
+                if (!checkAccessBeforeAction()) return;
                 if (confirm("Tem certeza que deseja excluir este registro?")) {
                     this.tarefas = this.tarefas.filter(t => t.id !== id);
                     this.salvarDadosLocal();
@@ -866,7 +934,6 @@
                 const filtroPrioridade = document.getElementById('filtro-prioridade').value;
                 const filtroStatus = document.getElementById('filtro-status').value;
 
-                // Ordenar por pontuação decrescente (regra da Matriz GUT)
                 const tarefasOrdenadas = [...this.tarefas].sort((a, b) => b.pontuacao - a.pontuacao);
 
                 const tarefasFiltradas = tarefasOrdenadas.filter(t => {
@@ -984,4 +1051,3 @@
     </script>
 </body>
 </html>
-```
